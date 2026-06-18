@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# dev artifacts (not part of the app)
+.dev.log
+.dsb-state.json
+.cinema-src/
+.cardservice*.png
+.navlink.png

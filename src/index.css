@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * {
+    @apply border-white/10;
+  }
+
+  html {
+    /* No native `scroll-behavior: smooth` — Lenis owns smooth scrolling and the two
+       fight (native easing on top of Lenis' transform causes jitter on anchor jumps). */
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-ink text-white/90 font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(45, 212, 255, 0.25);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #06070a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1b2030;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2a3145;
+  }
+}
+
+@layer components {
+  /* Glassmorphism base — frosted translucent surface */
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Numbered section eyebrow label — mono, tracked-out */
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-eyebrow text-white/55;
+  }
+
+  /* Accent gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #2dd4ff 0%, #8b5cf6 50%, #ff5c8a 100%);
+  }
+
+  /* Section vertical rhythm */
+  .section {
+    @apply relative mx-auto w-full max-w-[1440px] px-6 md:px-10 xl:px-16;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* Scroll-reveal — transition lives here; JS only toggles `is-in`.
+   `data-reveal` is only ever set by JS (when motion is allowed), so no-JS and
+   reduced-motion users always see fully-visible content. */
+[data-reveal] {
+  transition:
+    opacity 0.7s var(--ease-out-expo),
+    transform 0.7s var(--ease-out-expo),
+    filter 0.7s var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0s);
+}
+[data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(var(--reveal-y, 28px));
+  filter: blur(8px);
+}
+
+/* Respect reduced-motion: kill all non-essential animation */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
