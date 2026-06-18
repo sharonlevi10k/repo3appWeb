@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 
@@ -14,10 +14,16 @@ import { prefersReducedMotion } from '@/lib/motion'
  */
 export function LivingBackground() {
   const root = useRef<HTMLDivElement>(null)
+  // On touch devices the cinematic video is the backdrop, so these big blurred
+  // orbs are redundant — and iOS Safari renders their huge blur radii as solid
+  // white boxes. Render just a flat dark base on mobile instead. (Lazy initial
+  // state avoids a one-frame flash of the orbs before we switch.)
+  const [isTouch] = useState(() => window.matchMedia('(pointer: coarse)').matches)
 
   useLayoutEffect(() => {
     const el = root.current
     if (!el) return
+    if (isTouch) return
     if (prefersReducedMotion()) return
 
     const ctx = gsap.context(() => {
@@ -46,7 +52,12 @@ export function LivingBackground() {
     }, el)
 
     return () => ctx.revert()
-  }, [])
+  }, [isTouch])
+
+  // Mobile: flat dark base only (the video supplies the ambient motion).
+  if (isTouch) {
+    return <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-ink" />
+  }
 
   return (
     <div ref={root} aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-ink">

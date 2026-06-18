@@ -85,10 +85,19 @@ export function Navbar() {
           scrolled ? 'glass-strong h-14 shadow-glass' : 'h-16 bg-transparent',
         )}
       >
-        <a href="#home" className="flex items-center gap-2.5">
-          <LogoMark className="h-10 w-10 shrink-0" />
-          <span className="font-display text-lg font-semibold tracking-tight text-white">
-            {company.name}
+        <a href="#home" className="group flex items-center gap-2.5">
+          {/* Logo framed in a glass badge with a soft accent glow — reads as a
+              crafted brand mark rather than a bare icon. */}
+          <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.06] ring-1 ring-white/15 transition-all duration-base group-hover:ring-white/30">
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-cyan/25 to-accent-magenta/25 opacity-0 blur-md transition-opacity duration-base group-hover:opacity-100"
+            />
+            <LogoMark className="relative h-[26px] w-[26px]" />
+          </span>
+          <span className="font-display text-[19px] font-bold leading-none tracking-tight">
+            <span className="text-white">Sea</span>
+            <span className="text-gradient">App</span>
           </span>
         </a>
 
