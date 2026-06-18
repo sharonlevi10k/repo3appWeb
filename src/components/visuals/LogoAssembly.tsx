@@ -20,17 +20,23 @@ export function LogoAssembly() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [reduced, setReduced] = useState(false)
+  // On touch devices we play the source video instead of the 181-frame canvas
+  // sequence: preloading that many full-res JPGs blows iOS Safari's memory budget
+  // (it renders the <canvas> white and stalls). A single hardware-decoded video
+  // is light and smooth, and still gives mobile the cinematic backdrop.
+  const [isTouch, setIsTouch] = useState(false)
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
     const wrap = wrapRef.current
-    if (!canvas || !wrap) return
+    if (!wrap) return
 
-    // Skip the 181-frame cinematic canvas on touch devices. Preloading that many
-    // full-res JPGs blows iOS Safari's memory budget, which makes it render the
-    // <canvas> as a solid white block (and stalls the page). The dark
-    // LivingBackground stays behind, so mobile just gets a clean ambient backdrop.
-    if (window.matchMedia('(pointer: coarse)').matches) return
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      setIsTouch(true)
+      if (prefersReducedMotion()) setReduced(true)
+      return
+    }
+    if (!canvas) return
 
     const ctx = canvas.getContext('2d')!
     const images: HTMLImageElement[] = []
@@ -150,7 +156,20 @@ export function LogoAssembly() {
       className="pointer-events-none fixed inset-0 overflow-hidden"
       style={{ zIndex: -5, opacity: reduced ? 0.16 : undefined }}
     >
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      {isTouch ? (
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/cinema/hero.mp4"
+          poster="/cinema/frames/f_181.jpg"
+          autoPlay={!reduced}
+          muted
+          loop
+          playsInline
+          preload="auto"
+        />
+      ) : (
+        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      )}
       {/* legibility scrim over the hero copy side */}
       <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/25 to-ink/50" />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 120% at 58% 45%, transparent 50%, rgba(6,7,10,0.6) 100%)' }} />
