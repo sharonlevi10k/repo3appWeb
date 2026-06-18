@@ -25,6 +25,13 @@ export function LogoAssembly() {
     const canvas = canvasRef.current
     const wrap = wrapRef.current
     if (!canvas || !wrap) return
+
+    // Skip the 181-frame cinematic canvas on touch devices. Preloading that many
+    // full-res JPGs blows iOS Safari's memory budget, which makes it render the
+    // <canvas> as a solid white block (and stalls the page). The dark
+    // LivingBackground stays behind, so mobile just gets a clean ambient backdrop.
+    if (window.matchMedia('(pointer: coarse)').matches) return
+
     const ctx = canvas.getContext('2d')!
     const images: HTMLImageElement[] = []
     const state = { frame: 0 }

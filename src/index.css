@@ -114,3 +114,17 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* iOS Safari paints very large `filter: blur()` radii as a solid white box (it
+   exceeds the engine's blur buffer limits). These big ambient-glow blurs only
+   matter on desktop, so cap them on touch devices — the glows stay soft, just
+   without the white-box rendering bug. Targets the exact large-blur utilities. */
+@media (pointer: coarse) {
+  .blur-\[100px\],
+  .blur-\[120px\],
+  .blur-\[130px\],
+  .blur-\[150px\],
+  .blur-\[160px\] {
+    filter: blur(50px) !important;
+  }
+}
