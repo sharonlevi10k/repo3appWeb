@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer'
 import { LivingBackground } from '@/components/visuals/LivingBackground'
 import { LogoAssembly } from '@/components/visuals/LogoAssembly'
 import { ScrollProgress } from '@/components/ui/ScrollProgress'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { CameraSection } from '@/components/ui/CameraSection'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 import { Hero } from '@/components/sections/Hero'
@@ -20,8 +21,14 @@ export default function App() {
   useSmoothScroll()
   return (
     <div className="relative z-0 min-h-screen">
-      <LivingBackground />
-      <LogoAssembly />
+      {/* Decorative visuals are isolated so a failure (e.g. canvas on iOS) can
+          never blank the page — they just don't render. */}
+      <ErrorBoundary>
+        <LivingBackground />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <LogoAssembly />
+      </ErrorBoundary>
       <ScrollProgress />
       <Navbar />
       <main>

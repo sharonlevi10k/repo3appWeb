@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import {
   Environment,
@@ -9,6 +9,18 @@ import {
 } from '@react-three/drei'
 import * as THREE from 'three'
 import { cn } from '@/lib/cn'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+
+/** Lightweight static brand mark — used on touch devices and as a WebGL fallback. */
+function StaticMark({ className }: { className?: string }) {
+  return (
+    <img
+      src="/images/company/imagelogSeaApp.png"
+      alt="SeaApp logo"
+      className={cn('object-contain', className)}
+    />
+  )
+}
 
 /**
  * 3D rendition of the SeaApp brand mark — the glossy multi-colour "molecule"
@@ -157,25 +169,38 @@ function Particles({ count = 500 }: { count?: number }) {
  * sized small (e.g. h-9 w-9) by its parent.
  */
 export function LogoMark({ className }: { className?: string }) {
+  // iOS Safari (and touch devices generally) are fragile with WebGL — a tiny
+  // navbar/footer canvas can fail to init and, uncaught, blank the whole app.
+  // So default to the static mark and only upgrade to the 3D canvas on
+  // fine-pointer (desktop) devices; even then, an ErrorBoundary falls back.
+  const [use3D, setUse3D] = useState(false)
+  useEffect(() => {
+    if (window.matchMedia('(pointer: fine)').matches) setUse3D(true)
+  }, [])
+
+  if (!use3D) return <StaticMark className={className} />
+
   return (
     <div className={cn('relative', className)}>
-      <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
-        {/* pulled in a touch so the cluster fills the tiny frame */}
-        <PerspectiveCamera makeDefault position={[0, 0, 5.4]} fov={45} />
+      <ErrorBoundary fallback={<StaticMark className="absolute inset-0 h-full w-full" />}>
+        <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }} style={{ background: 'transparent' }}>
+          {/* pulled in a touch so the cluster fills the tiny frame */}
+          <PerspectiveCamera makeDefault position={[0, 0, 5.4]} fov={45} />
 
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[3, 4, 5]} intensity={1.4} />
-        <pointLight position={[-5, -2, 3]} intensity={30} color="#ec008c" />
-        <pointLight position={[5, 3, 4]} intensity={30} color="#29abe2" />
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[3, 4, 5]} intensity={1.4} />
+          <pointLight position={[-5, -2, 3]} intensity={30} color="#ec008c" />
+          <pointLight position={[5, 3, 4]} intensity={30} color="#29abe2" />
 
-        <Environment resolution={128}>
-          <Lightformer intensity={2} position={[0, 3, 4]} scale={[8, 3, 1]} color="#ffffff" />
-          <Lightformer intensity={1.2} position={[-4, 0, 2]} scale={[3, 6, 1]} color="#9bd6ff" />
-          <Lightformer intensity={1.2} position={[4, -1, 2]} scale={[3, 6, 1]} color="#ffc4ec" />
-        </Environment>
+          <Environment resolution={128}>
+            <Lightformer intensity={2} position={[0, 3, 4]} scale={[8, 3, 1]} color="#ffffff" />
+            <Lightformer intensity={1.2} position={[-4, 0, 2]} scale={[3, 6, 1]} color="#9bd6ff" />
+            <Lightformer intensity={1.2} position={[4, -1, 2]} scale={[3, 6, 1]} color="#ffc4ec" />
+          </Environment>
 
-        <LogoMesh />
-      </Canvas>
+          <LogoMesh />
+        </Canvas>
+      </ErrorBoundary>
     </div>
   )
 }
